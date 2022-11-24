@@ -8,16 +8,20 @@ namespace ISA_Marcin_Ryba_Lab03
 {
 	public class DataRow
 	{
-		public string ChildXBin = null;
-		public string MutatedChromosomeValue = null;
+		public DataRow ParentsWith = null;
 		
 		public readonly long Index;
 		
-		public DataRow ParentsWith = null;
-		public static readonly DataRow Empty = new DataRow(null, -1);
+		public SortedSet<int> GenesValueAfterMutation = new();
 		
-		public SortedSet<int> GenesValueAfterMutation = new SortedSet<int>();
+		public int? PcValue = null;
+		
+		public string ChildXBin = null;
+		public string MutatedChromosomeValue = null;
 
+		public bool IsParent => _randomizedParent < StaticValues.Pk;
+		public bool IsEliteTakingOver = false;
+		
 		public readonly Values OriginalValues;
 		public Values SelectedValue;
 		
@@ -29,11 +33,6 @@ namespace ISA_Marcin_Ryba_Lab03
 		public double FinalXRealValue;
 		public double FinalFxRealValue;
 		
-		public int? PcValue = null;
-
-		public bool IsEliteTakingOver = false;
-		public bool IsParent => _randomizedParent < StaticValues.Pk;
-
 		public DataRow(Values originalValues, long index)
 		{
 			OriginalValues = originalValues;

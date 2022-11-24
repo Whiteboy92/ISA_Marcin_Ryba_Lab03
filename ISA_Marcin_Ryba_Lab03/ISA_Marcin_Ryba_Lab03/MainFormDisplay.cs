@@ -20,9 +20,10 @@ namespace ISA_Marcin_Ryba_Lab03
 		private Button _startButton;
 		
 		private DropDown _dInput;
+		private DropDown _targetFunctionDropdown;
 		
 		private GridView _cumulatedDataOutputTable;
-		
+
 		//--------------------------------------------------------------------------------------
 		
 		private TextBox _bestParamsAInput;
@@ -41,6 +42,8 @@ namespace ISA_Marcin_Ryba_Lab03
 
 		private CheckBox _bestParamsIsEliteCheckbox;
 
+		//--------------------------------------------------------------------------------------
+		
 		private readonly TabControl _tabsControl;
 		
 		private readonly TabPage _plotViewTabPage;
@@ -49,8 +52,8 @@ namespace ISA_Marcin_Ryba_Lab03
 		private readonly PlotView _plotView;
 		private readonly StackLayout _initializeBasicControls;
 
-		private DropDown _targetFunctionDropdown;
-		private DropDown _analysisTargetFunctionDropdown;
+
+		private DropDown _bestParamsTargetFunctionDropdown;
 		
 		private const int PanelWidth = 15;
 
@@ -99,7 +102,7 @@ namespace ISA_Marcin_Ryba_Lab03
 				Text = "Plot Page"
 			};
 			
-			var analysisResultsPage = new TabPage()
+			var bestParamsResultTabPage = new TabPage()
 			{
 				Content = new StackLayout()
 				{
@@ -119,7 +122,7 @@ namespace ISA_Marcin_Ryba_Lab03
 			{
 				Pages =
 				{
-					_cumulatedDataTabPage, _plotViewTabPage,  analysisResultsPage
+					_cumulatedDataTabPage, _plotViewTabPage,  bestParamsResultTabPage
 				}
 			};
 
@@ -135,7 +138,7 @@ namespace ISA_Marcin_Ryba_Lab03
 				}
 			};
 
-			SizeChanged += (sender, args) =>
+			SizeChanged += (_, _) =>
 			{
 				if (_cumulatedDataOutputTable != null)
 				{
@@ -160,6 +163,103 @@ namespace ISA_Marcin_Ryba_Lab03
 			};
 		}
 
+		//------------------------------------------------------------------------------
+		
+		private StackLayout InitializeBasicControls()
+		{
+			_aInput = new TextBox()
+			{
+				Text = "-4"
+			};
+			_bInput = new TextBox()
+			{
+				Text = "12"
+			};
+			_dInput = new DropDown()
+			{
+				Items = { "1", "0.1", "0.01", "0.001" },
+				SelectedIndex = 3
+			};
+			_nInput = new TextBox()
+			{
+				Text = "80"
+			};
+			
+			_pkInput = new TextBox()
+			{
+				Text = "0.9"
+			};
+			
+			_pmInput = new TextBox()
+			{
+				Text = "0.0001"
+			};
+			
+			_targetFunctionDropdown = new DropDown()
+			{
+				Items = { "MAX", "MIN" },
+				SelectedIndex = 0
+			};
+
+			_tInput = new TextBox()
+			{
+				Text = "110"
+			};
+
+			_isEliteCheckbox = new CheckBox()
+			{
+				ThreeState = false,
+				Checked = true
+			};
+			
+			_startButton = new Button()
+			{
+				Text = "Start",
+				Command = new Command((_, _) => ExecuteGeneration())
+			};
+
+			var controls = new StackLayout()
+			{
+				Orientation = Orientation.Horizontal,
+				AlignLabels = true,
+				VerticalContentAlignment = VerticalAlignment.Center,
+				HorizontalContentAlignment = HorizontalAlignment.Center,
+				Padding = 10,
+				Items =
+				{
+					LabelOverride("A: "),
+					_aInput,
+					PanelOverride(),
+					LabelOverride("B: "),
+					_bInput,
+					PanelOverride(),
+					LabelOverride("D: "),
+					_dInput,
+					PanelOverride(),
+					LabelOverride("N: "),
+					_nInput,
+					PanelOverride(),
+					LabelOverride("PK: "),
+					_pkInput,
+					PanelOverride(),
+					LabelOverride("PM: "),
+					_pmInput,
+					PanelOverride(),
+					LabelOverride("Target: "),
+					_targetFunctionDropdown,
+					PanelOverride(),
+					LabelOverride("T: "),
+					_tInput,
+					PanelOverride(),
+					LabelOverride("isElite: "),
+					_isEliteCheckbox,
+					PanelOverride(),
+					_startButton
+				}
+			};
+			return controls;
+		}
+
 		private StackLayout InitializeBestParamsControls()
 		{
 			_bestParamsAInput = new TextBox()
@@ -180,7 +280,7 @@ namespace ISA_Marcin_Ryba_Lab03
 			
 			_bestParamsPkValue = new TextBox()
 			{
-				Text = $"{0.50:0.00};{0.60:0.00};{0.70:0.00};{0.80:0.00};{0.90:0.00}",
+				Text = $"{0.50:0.0};{0.60:0.0};{0.70:0.0};{0.80:0.0};{0.90:0.0}",
 				Width = 100
 			};
 			
@@ -211,10 +311,10 @@ namespace ISA_Marcin_Ryba_Lab03
 			_bestParamsStartButton = new Button()
 			{
 				Text = "Start",
-				Command = new Command((sender, e) => FindBestParams())
+				Command = new Command((_, _) => FindBestParams())
 			};
 			
-			_analysisTargetFunctionDropdown = new DropDown()
+			_bestParamsTargetFunctionDropdown = new DropDown()
 			{
 				Items = { "MAX", "MIN" },
 				SelectedIndex = 0
@@ -248,7 +348,7 @@ namespace ISA_Marcin_Ryba_Lab03
 					_bestParamsIsEliteCheckbox,
 					PanelOverride(),
 					LabelOverride("Target: "),
-					_analysisTargetFunctionDropdown,
+					_bestParamsTargetFunctionDropdown,
 					PanelOverride(),
 					LabelOverride("PK: "),
 					_bestParamsPkValue,
@@ -367,101 +467,6 @@ namespace ISA_Marcin_Ryba_Lab03
 					}
 				});
 			}
-		}
-
-		private StackLayout InitializeBasicControls()
-		{
-			_aInput = new TextBox()
-			{
-				Text = "-4"
-			};
-			_bInput = new TextBox()
-			{
-				Text = "12"
-			};
-			_dInput = new DropDown()
-			{
-				Items = { "1", "0.1", "0.01", "0.001" },
-				SelectedIndex = 3
-			};
-			_nInput = new TextBox()
-			{
-				Text = "80"
-			};
-			
-			_pkInput = new TextBox()
-			{
-				Text = "0.9"
-			};
-			
-			_pmInput = new TextBox()
-			{
-				Text = "0.0001"
-			};
-			
-			_targetFunctionDropdown = new DropDown()
-			{
-				Items = { "MAX", "MIN" },
-				SelectedIndex = 0
-			};
-
-			_tInput = new TextBox()
-			{
-				Text = "110"
-			};
-
-			_isEliteCheckbox = new CheckBox()
-			{
-				ThreeState = false,
-				Checked = true
-			};
-			
-			_startButton = new Button()
-			{
-				Text = "Start",
-				Command = new Command((sender, args) => ExecuteGeneration())
-			};
-
-			var controls = new StackLayout()
-			{
-				Orientation = Orientation.Horizontal,
-				AlignLabels = true,
-				VerticalContentAlignment = VerticalAlignment.Center,
-				HorizontalContentAlignment = HorizontalAlignment.Center,
-				Padding = 10,
-				Items =
-				{
-					LabelOverride("A: "),
-					_aInput,
-					PanelOverride(),
-					LabelOverride("B: "),
-					_bInput,
-					PanelOverride(),
-					LabelOverride("D: "),
-					_dInput,
-					PanelOverride(),
-					LabelOverride("N: "),
-					_nInput,
-					PanelOverride(),
-					LabelOverride("PK: "),
-					_pkInput,
-					PanelOverride(),
-					LabelOverride("PM: "),
-					_pmInput,
-					PanelOverride(),
-					LabelOverride("Target: "),
-					_targetFunctionDropdown,
-					PanelOverride(),
-					LabelOverride("T: "),
-					_tInput,
-					PanelOverride(),
-					LabelOverride("isElite: "),
-					_isEliteCheckbox,
-					PanelOverride(),
-					_startButton
-				}
-			};
-			return controls;
 		}
 
 		private static Label LabelOverride(string text, string tooltip = null)
